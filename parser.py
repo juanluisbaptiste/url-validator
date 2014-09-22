@@ -139,8 +139,9 @@ urlsResto = []       #path y query de la url
 urlsComplete = []    #urlsDomain[] + urlsResto[]
 
 for li in lineas:
-    liNew = "http://" + li
-    parsedUrl = urlparse.urlparse(liNew)
+    #liNew = "http://" + li
+    liNew = li
+    parsedUrl = urlparse.urlparse(liNew)    
     urlsDomain.append(regex.sub(lambda x: str(caracteresNoPermitidos[x.string[x.start() :x.end()]]), parsedUrl.netloc))
     urlsResto.append(parsedUrl.path + parsedUrl.query)
 
