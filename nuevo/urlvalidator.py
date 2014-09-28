@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import argparse
+from cStringIO import StringIO
 import os
+import pycurl
 import re
 import sys
 from urlparse import urlparse
@@ -10,6 +12,12 @@ CODE_200=1
 CODE_404=2
 CODE_500=3
 
+class Url:
+    def __init__(self,url,response_code = -1):
+        self.url = url
+        self.response_code = response_code
+	url = None
+	response_code = -1
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
@@ -73,25 +81,78 @@ def openFile(filename, mode = 'r'):
 
 
 def saveFile(filename,content):
-        arch = open(filename, 'aw')
+        arch = open(filename, 'w')
         try:
-            arch.write(content + '\r\n')
+            arch.write(content)
         finally:	
             arch.close()
 
+def testUrls(validUrls, invalidUrls):
+	urls = validUrls # list of urls
+	reqs: List of individual requests.
+	Each list element will be a 3-tuple of url (string), response string buffer
+	(cStringIO.StringIO), and request handle (pycurl.Curl object).
+	reqs = [] 
 
-def writeInvalidFile(filename,invalidLines,code):
+	Build multi-request object.
+	m = pycurl.CurlMulti()
+	for url in urls: 
+		response = StringIO()
+		header = StringIO()
+		handle = pycurl.Curl()
+		handle.setopt(pycurl.URL, url.url)
+		handle.setopt(pycurl.WRITEFUNCTION, response.write)
+		handle.setopt(pycurl.HEADERFUNCTION, header.write)
+		req = (url, response, handle)
+		Note that the handle must be added to the multi object
+		by reference to the req tuple (threading?).
+		m.add_handle(req[2])
+		reqs.append(req)
+
+	Perform multi-request.
+	This code copied from pycurl docs, modified to explicitly
+	set num_handles before the outer while loop.
+	SELECT_TIMEOUT = 5.0
+	num_handles = len(reqs)
+	while num_handles:
+		ret = m.select(SELECT_TIMEOUT)
+		if ret == -1:
+			continue
+		while 1:
+			ret, num_handles = m.perform()
+			if ret != pycurl.E_CALL_MULTI_PERFORM: 
+				break
+	
+	def __get_url(url,url2):
+		if url != url2 :
+			return True
+		else:
+			return False
+	
+	i = 0
+	for req in reqs:
+		print req[1].getvalue()
+		print req[0] + "->" + `req[2].getinfo(pycurl.HTTP_CODE)`
+		if req[2].getinfo(pycurl.HTTP_CODE) != CODE_200 :
+			validUrls = filter(__get_url,req[0], validUrls[i])
+			new_invalid_url = Url(req[0].url,req[2].getinfo(pycurl.HTTP_CODE))
+			reqs.remove(req[0])
+			invalidUrls.append(new_invalid_url)
+		i +=1	
+	return reqs[0]
+    
+def writeInvalidFile(filename,invalidLines):
 	content=""
 	
 	for i in invalidLines:
-		content += i + "," + `code` + "\r\n"
+		content += i.url + "," + `i.response_code` + "\r\n"
 	saveFile(filename, content)
 
 def writeValidFile(filename,validLines):
 	content=""
 	
 	for i in validLines:
-		content += i + "\r\n"
+		content += i.url + "\r\n"
 	saveFile(filename, content)
 	
 	
@@ -100,20 +161,23 @@ def parseFile(filename, validLines, invalidLines):
 	
 	for i in lines:
 		i = i.strip()
+		url = Url(i)
+		
 		if not isURLValid(i):
 			if not isDomainNameValid(i):
 				#print "INVALID URL: " + i
-				invalidLines.append(i)
+				url.response_code = -1
+				invalidLines.append(url)
 			else:
-				url = urlparse(i)
-				if not url.scheme == "http" :
-					i = "http://" + i					
-				if not url.scheme == "https" :
-					i = "https://" + i
-				validLines.append(i)
+				parsed_url = urlparse(i)
+				if not parsed_url.scheme == "http" and not parsed_url.scheme == "https":
+					url.url = "http://" + i					
+#				if not url.scheme == "https" :
+#					i = "https://" + i
+				validLines.append(url)
 		else:
 			#print "VALID URL=" + i
-			validLines.append(i)
+			validLines.append(url)
 
 def search(args):
 	validLines = []
@@ -128,8 +192,12 @@ def search(args):
 	print "Number of valid URL's: " + `len(validLines)`
 	print "Number of invalid URL's: " + `len(invalidLines)`
 
-    #Save new lists to their respective files
-	writeInvalidFile(args.invalid_file[0], invalidLines, BAD_URL)
+	#Step 2: Test valid URL's and split the invalid ones (anything that)
+	#doesn't returns a HTTP 200 ok code.
+	testUrls(validLines, invalidLines)
+	
+	#Step 3: Save new lists to their respective files
+	writeInvalidFile(args.invalid_file[0], invalidLines)
 	writeValidFile(args.dest_file[0], validLines)
 
 
