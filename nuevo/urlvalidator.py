@@ -7,17 +7,6 @@ import re
 import sys
 from urlparse import urlparse
 
-BAD_URL=0
-CODE_200=1
-CODE_404=2
-CODE_500=3
-
-class Url:
-    def __init__(self,url,response_code = -1):
-        self.url = url
-        self.response_code = response_code
-	url = None
-	response_code = -1
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
@@ -42,12 +31,6 @@ def isURLValid(url) :
   else:
     return False
    
-def parseURL(url):
-  if url:
-    return urlparse(url)
-  else:
-    return None
-
 
 def openFile(filename, mode = 'r'):
 #	if not mode:
