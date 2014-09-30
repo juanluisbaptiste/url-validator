@@ -186,7 +186,7 @@ def run():
 		      required=True)  
   parser.add_argument('--verbose', '-v', 
 		      action='count', 
-		      help='Verbose output. -vv debug output')
+		      help='Verbose output.')
   parser.add_argument('--version', action='version', version='urlvalidator 0.1 \n')		    
 
   parser.set_defaults(func=search)
