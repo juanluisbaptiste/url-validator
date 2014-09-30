@@ -167,19 +167,19 @@ def search(args):
 
 def run():
   # create the top-level parser
-  parser = argparse.ArgumentParser(description='Apukay Security URL Validator Tool.', 
+	parser = argparse.ArgumentParser(description='Apukay Security URL Validator Tool.', 
 				  epilog='Apukay Security. - All rights reserved 2014')
-  parser.add_argument('-s', '--source', 
+	parser.add_argument('-s', '--source', 
 		      dest='source_file', 
 		      nargs=1, 
 		      help='Path to file containing URL\'s to validate.', 
 		      required=True)
-  parser.add_argument('-d', '--dest', 
+	parser.add_argument('-d', '--dest', 
 		      dest='dest_file', 
 		      nargs=1, 
 		      help='Name of file containing the list of valid URL\'s.', 
 		      required=True)
-  parser.add_argument('-i', '--invalid', 
+	parser.add_argument('-i', '--invalid', 
 		      dest='invalid_file', 
 		      nargs=1, 
 		      help='Name of file containing the list of invalid URL\'s.', 
@@ -187,11 +187,11 @@ def run():
   parser.add_argument('--verbose', '-v', 
 		      action='count', 
 		      help='Verbose output.')
-  parser.add_argument('--version', action='version', version='urlvalidator 0.1 \n')		    
+	parser.add_argument('--version', action='version', version='urlvalidator 0.1 \n')		    
 
-  parser.set_defaults(func=search)
-  args = parser.parse_args()
-  args.func(args)
+	parser.set_defaults(func=search)
+	args = parser.parse_args()
+	args.func(args)
 
 if __name__ == "__main__":
   run()
