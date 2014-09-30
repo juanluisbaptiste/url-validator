@@ -41,23 +41,6 @@ def isURLValid(url) :
     return True
   else:
     return False
- 
-def isPathValid(strg, search=re.compile(r'^\/[/.a-zA-Z0-9-~]*$').search):
-  return bool(search(strg))    
-
-def isIPAddressValid(strg):
-  regex = re.compile(r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))')
-  #Allow the special "all networks" network format 0/0
-  if regex.match(strg) or strg == "0/0" or strg == "!0/0":
-    return True
-  else:
-    return False
-
-def isPortValid(port):
-  if port.isdigit() and int(port) <= 65536:
-    return True
-  else:
-    return False
    
 def parseURL(url):
   if url:
