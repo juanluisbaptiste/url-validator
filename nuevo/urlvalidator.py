@@ -145,7 +145,7 @@ def search(args):
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
 	print "Invalid url's file: " + args.invalid_file[0] + "\n"
-	print "Starting url validation...\n"
+	print "Parsing url's...\n"
 	
 	#Step 1: Load the file and split valid lines from malformed ones
 	parseFile(args.source_file[0])
@@ -155,7 +155,7 @@ def search(args):
 
 	#Step 2: Test valid url's and split the invalid ones (anything that)
 	#doesn't returns a HTTP 200 ok code.
-	print "\nStarting to test valid url's..."
+	print "\nTesting valid url's..."
 	testUrls()
 	print "Done."
 	
