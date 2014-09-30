@@ -158,13 +158,13 @@ def search(args):
 	print "Number of malformed url's: " + `len(invalid_urls)`
 	print "Number of concurrent connections to launch: " + str(concurrent)
 
-	#Step 2: Test valid URL's and split the invalid ones (anything that)
+	#Step 2: Test valid url's and split the invalid ones (anything that)
 	#doesn't returns a HTTP 200 ok code.
 	print "\nStarting to test valid url's..."
 	testUrls()
-	print "\nDone"
+	print "Done."
 	
-	print "\nWriting results to output files..."
+	print "Writing results to output files...\n"
 	#Step 3: Save new lists to their respective files
 	writeInvalidFile(args.invalid_file[0])
 	writeValidFile(args.dest_file[0])
@@ -178,17 +178,17 @@ def run():
 	parser.add_argument('-s', '--source', 
 		      dest='source_file', 
 		      nargs=1, 
-		      help='Path to file containing URL\'s to validate.', 
+		      help='Path to file containing url\'s to validate.', 
 		      required=True)
 	parser.add_argument('-d', '--dest', 
 		      dest='dest_file', 
 		      nargs=1, 
-		      help='Name of file containing the list of valid URL\'s.', 
+		      help='Name of file containing the list of valid url\'s.',
 		      required=True)
 	parser.add_argument('-i', '--invalid', 
 		      dest='invalid_file', 
 		      nargs=1, 
-		      help='Name of file containing the list of invalid URL\'s.', 
+		      help='Name of file containing the list of invalid url\'s.', 
 		      required=True)  
 	parser.add_argument('-c', '--concurrent-connections', 
 		      dest='concurrent_conn', 
