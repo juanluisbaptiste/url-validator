@@ -142,6 +142,10 @@ def parseFile(filename):
 def search(args):
 	validLines = []
 	invalidLines = []
+	global concurrent
+	if args.concurrent_conn > 0 :
+		concurrent = args.concurrent_conn[0]
+
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
 	print "Invalid url's file: " + args.invalid_file[0] + "\n"
@@ -152,6 +156,7 @@ def search(args):
 	print "Number of valid url's: " + `len(valid_urls)`
 	#TODO # of fixed urls
 	print "Number of malformed url's: " + `len(invalid_urls)`
+	print "Number of concurrent connections to launch: " + str(concurrent)
 
 	#Step 2: Test valid URL's and split the invalid ones (anything that)
 	#doesn't returns a HTTP 200 ok code.
@@ -166,6 +171,7 @@ def search(args):
 
 
 def run():
+	global concurrent
   # create the top-level parser
 	parser = argparse.ArgumentParser(description='Apukay Security URL Validator Tool.', 
 				  epilog='Apukay Security. - All rights reserved 2014')
@@ -184,7 +190,12 @@ def run():
 		      nargs=1, 
 		      help='Name of file containing the list of invalid URL\'s.', 
 		      required=True)  
-  parser.add_argument('--verbose', '-v', 
+	parser.add_argument('-c', '--concurrent-connections', 
+		      dest='concurrent_conn', 
+		      nargs=1, 
+		      help='Amount of concurrent connections to launch (default is ' + `concurrent` + ').', 
+		      required=False)    
+	parser.add_argument('--verbose', '-v', 
 		      action='count', 
 		      help='Verbose output.')
 	parser.add_argument('--version', action='version', version='urlvalidator 0.1 \n')		    
@@ -195,3 +206,4 @@ def run():
 
 if __name__ == "__main__":
   run()
+  
