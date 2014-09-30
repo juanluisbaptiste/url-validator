@@ -2,11 +2,19 @@
 import argparse
 from cStringIO import StringIO
 import os
-import pycurl
 import re
 import sys
 from urlparse import urlparse
+from twisted.internet import reactor, threads
+import httplib
+import itertools
 
+concurrent = 400
+finished=itertools.count(1)
+reactor.suggestThreadPoolSize(concurrent)
+added=0
+valid_urls = {}
+invalid_urls = {}
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
@@ -53,118 +61,108 @@ def saveFile(filename,content):
         finally:	
             arch.close()
 
-def testUrls(validUrls, invalidUrls):
-	urls = validUrls # list of urls
-	reqs: List of individual requests.
-	Each list element will be a 3-tuple of url (string), response string buffer
-	(cStringIO.StringIO), and request handle (pycurl.Curl object).
-	reqs = [] 
+def testUrls():
+	global added
+	for url in valid_urls:
+		added+=1
+		addTask(url)
 
-	Build multi-request object.
-	m = pycurl.CurlMulti()
-	for url in urls: 
-		response = StringIO()
-		header = StringIO()
-		handle = pycurl.Curl()
-		handle.setopt(pycurl.URL, url.url)
-		handle.setopt(pycurl.WRITEFUNCTION, response.write)
-		handle.setopt(pycurl.HEADERFUNCTION, header.write)
-		req = (url, response, handle)
-		Note that the handle must be added to the multi object
-		by reference to the req tuple (threading?).
-		m.add_handle(req[2])
-		reqs.append(req)
+	try:
+		reactor.run()
+	except KeyboardInterrupt:
+		reactor.stop()
 
-	Perform multi-request.
-	This code copied from pycurl docs, modified to explicitly
-	set num_handles before the outer while loop.
-	SELECT_TIMEOUT = 5.0
-	num_handles = len(reqs)
-	while num_handles:
-		ret = m.select(SELECT_TIMEOUT)
-		if ret == -1:
-			continue
-		while 1:
-			ret, num_handles = m.perform()
-			if ret != pycurl.E_CALL_MULTI_PERFORM: 
-				break
-	
-	def __get_url(url,url2):
-		if url != url2 :
-			return True
-		else:
-			return False
-	
-	i = 0
-	for req in reqs:
-		print req[1].getvalue()
-		print req[0] + "->" + `req[2].getinfo(pycurl.HTTP_CODE)`
-		if req[2].getinfo(pycurl.HTTP_CODE) != CODE_200 :
-			validUrls = filter(__get_url,req[0], validUrls[i])
-			new_invalid_url = Url(req[0].url,req[2].getinfo(pycurl.HTTP_CODE))
-			reqs.remove(req[0])
-			invalidUrls.append(new_invalid_url)
-		i +=1	
-	return reqs[0]
+
+def getStatus(ourl):
+    url = urlparse(ourl)
+    conn = httplib.HTTPConnection(url.netloc)   
+    conn.request("HEAD", url.path)
+    res = conn.getresponse()
+    return res.status
+
+def processResponse(response,url):
+	global invalid_urls
+	if response == 200 or response == 301 or response == 302 :
+		valid_urls[url] = response
+	else :
+		invalid_urls[url] = response
+		del valid_urls[url]
+	processedOne()
+
+def processError(error,url):
+    invalid_urls[url] = error.getErrorMessage()
+    processedOne()
+
+def processedOne():
+	global added
+	if finished.next()==added:
+		reactor.stop()
+
+def addTask(url):
+    req = threads.deferToThread(getStatus, url)
+    req.addCallback(processResponse, url)
+    req.addErrback(processError, url)   
     
-def writeInvalidFile(filename,invalidLines):
+def writeInvalidFile(filename):
+	global invalid_urls
 	content=""
 	
-	for i in invalidLines:
-		content += i.url + "," + `i.response_code` + "\r\n"
+	for url in invalid_urls:
+		content += url + "," + `invalid_urls[url]` + "\r\n"
 	saveFile(filename, content)
 
-def writeValidFile(filename,validLines):
+def writeValidFile(filename):
+	global valid_urls
 	content=""
 	
-	for i in validLines:
-		content += i.url + "\r\n"
+	for url in valid_urls:
+		content += url + "," + `valid_urls[url]` + "\r\n"
 	saveFile(filename, content)
 	
 	
-def parseFile(filename, validLines, invalidLines):
+def parseFile(filename):
 	lines = openFile(filename)
+	global valid_urls,invalid_urls
 	
-	for i in lines:
-		i = i.strip()
-		url = Url(i)
+	for url in lines:
+		url = url.strip()
 		
-		if not isURLValid(i):
-			if not isDomainNameValid(i):
-				#print "INVALID URL: " + i
-				url.response_code = -1
-				invalidLines.append(url)
+		if not isURLValid(url):
+			if not isDomainNameValid(url):
+				invalid_urls[url] = 'MALFORMED'
+				
 			else:
-				parsed_url = urlparse(i)
+				parsed_url = urlparse(url)
 				if not parsed_url.scheme == "http" and not parsed_url.scheme == "https":
-					url.url = "http://" + i					
-#				if not url.scheme == "https" :
-#					i = "https://" + i
-				validLines.append(url)
+					url = "http://" + url
+				valid_urls[url] = ''
 		else:
-			#print "VALID URL=" + i
-			validLines.append(url)
+			valid_urls[url] = ''
 
 def search(args):
 	validLines = []
 	invalidLines = []
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
-	print "Invalid URL's file: " + args.invalid_file[0] + "\n"
-	print "Starting URL validation...\n"
+	print "Invalid url's file: " + args.invalid_file[0] + "\n"
+	print "Starting url validation...\n"
 	
 	#Step 1: Load the file and split valid lines from malformed ones
-	parseFile(args.source_file[0], validLines, invalidLines)
-	print "Number of valid URL's: " + `len(validLines)`
-	print "Number of invalid URL's: " + `len(invalidLines)`
+	parseFile(args.source_file[0])
+	print "Number of valid url's: " + `len(valid_urls)`
+	#TODO # of fixed urls
+	print "Number of malformed url's: " + `len(invalid_urls)`
 
 	#Step 2: Test valid URL's and split the invalid ones (anything that)
 	#doesn't returns a HTTP 200 ok code.
-	testUrls(validLines, invalidLines)
+	print "\nStarting to test valid url's..."
+	testUrls()
+	print "\nDone"
 	
+	print "\nWriting results to output files..."
 	#Step 3: Save new lists to their respective files
-	writeInvalidFile(args.invalid_file[0], invalidLines)
-	writeValidFile(args.dest_file[0], validLines)
+	writeInvalidFile(args.invalid_file[0])
+	writeValidFile(args.dest_file[0])
 
 
 def run():
