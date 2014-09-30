@@ -9,7 +9,7 @@ from twisted.internet import reactor, threads
 import httplib
 import itertools
 
-concurrent = 400
+concurrent = 200
 finished=itertools.count(1)
 reactor.suggestThreadPoolSize(concurrent)
 added=0
