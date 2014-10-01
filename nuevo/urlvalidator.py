@@ -15,6 +15,7 @@ reactor.suggestThreadPoolSize(concurrent)
 added=0
 valid_urls = {}
 invalid_urls = {}
+fixed_url_counter = 0
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
@@ -142,6 +143,7 @@ def parseFile(filename):
 def search(args):
 	validLines = []
 	invalidLines = []
+	global fixed_url_counter
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
 	print "Invalid url's file: " + args.invalid_file[0] + "\n"
@@ -152,7 +154,7 @@ def search(args):
 	print "Number of valid url's: " + `len(valid_urls)`
 	#TODO # of fixed urls
 	print "Number of malformed url's: " + `len(invalid_urls)`
-
+	print "Number of fixed url's: " + `fixed_url_counter`
 	#Step 2: Test valid url's and split the invalid ones (anything that)
 	#doesn't returns a HTTP 200 ok code.
 	print "\nTesting valid url's..."
