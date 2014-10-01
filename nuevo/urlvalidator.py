@@ -123,26 +123,27 @@ def writeValidFile(filename):
 	
 def parseFile(filename):
 	lines = openFile(filename)
-	global valid_urls,invalid_urls
+	global valid_urls,invalid_urls, fixed_url_counter
+	schemes = ['http', 'https']
 	
 	for url in lines:
-		url = url.strip()
-		
-		if not isURLValid(url):
-			if not isDomainNameValid(url):
-				invalid_urls[url] = 'MALFORMED'
-				
-			else:
-				parsed_url = urlparse(url)
-				if not parsed_url.scheme == "http" and not parsed_url.scheme == "https":
-					url = "http://" + url
+		url = url.strip()		
+		if not url.startswith('#') :
+			parsed_url = urlparse(url)
+			if parsed_url.scheme not in schemes:
+				#print "Found url missing protocol sheme, fixing it..."
+				new_url = "http://" + url
+				valid_urls[new_url] = 'FIXED'
+				#parse again the URL
+				parsed_url = urlparse(new_url)
+				fixed_url_counter+=1
+			elif isURLValid(url) and isDomainNameValid(parsed_url.netloc):
 				valid_urls[url] = ''
-		else:
-			valid_urls[url] = ''
+			else:
+				invalid_urls[url] = 'MALFORMED'
+
 
 def search(args):
-	validLines = []
-	invalidLines = []
 	global fixed_url_counter
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
