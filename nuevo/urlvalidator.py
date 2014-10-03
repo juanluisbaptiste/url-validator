@@ -122,7 +122,7 @@ def writeInvalidFile(filename):
 	content=""
 	
 	for url in invalid_urls:
-		content += url + "," + `invalid_urls[url]` + "\r\n"
+		content += url + "," + `invalid_urls[url]` + "\n"
 	saveFile(filename, content)
 
 def writeValidFile(filename):
