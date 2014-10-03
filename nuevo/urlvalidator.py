@@ -183,9 +183,9 @@ def search(args):
 	print "Number of fixed url's: " + `fixed_url_counter`
 	print "Total of parsed url's: " + `len(valid_urls) + len(invalid_urls)`
 	#Step 2: Test valid url's and split the invalid ones (anything that)
-	#doesn't returns a HTTP 200 ok code.
-	print "\nTesting valid url's..."
-	#testUrls()
+	#doesn't returns a HTTP 200, 301 or 302 HTTP codes.
+	print "\nTesting valid url's (this can take a while)..."
+	testUrls()
 	print "Done."
 	
 	print "Writing results to output files...\n"
