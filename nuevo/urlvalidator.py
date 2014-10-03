@@ -130,7 +130,7 @@ def writeValidFile(filename):
 	content=""
 	
 	for url in valid_urls:
-		content += url + "," + `valid_urls[url]` + "\r\n"
+		content += url + "," + `valid_urls[url]` + "\n"
 	saveFile(filename, content)
 	
 	
