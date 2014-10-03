@@ -11,7 +11,6 @@ import itertools
 
 concurrent = 200
 finished=itertools.count(1)
-reactor.suggestThreadPoolSize(concurrent)
 added=0
 original_urls = None
 valid_urls = {}
@@ -173,6 +172,7 @@ def search(args):
 	global fixed_url_counter, concurrent
 	if args.concurrent_conn > 0 :
 		concurrent = args.concurrent_conn[0]
+	reactor.suggestThreadPoolSize(concurrent)
 
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
@@ -195,7 +195,7 @@ def search(args):
 	print "\nResults:\n"
 	print "Number of valid url's: " + `len(valid_urls)`
 	print "Number of malformed url's: " + `len(invalid_urls)`	
-	print "\nWriting results to output files...\n"
+	print "\nWriting results to output files..."
 	#Step 3: Save new lists to their respective files
 	writeInvalidFile(args.invalid_file[0])
 	writeValidFile(args.dest_file[0])
