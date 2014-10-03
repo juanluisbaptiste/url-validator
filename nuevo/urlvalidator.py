@@ -13,32 +13,46 @@ concurrent = 200
 finished=itertools.count(1)
 reactor.suggestThreadPoolSize(concurrent)
 added=0
+original_urls = None
 valid_urls = {}
 invalid_urls = {}
+fixed_url_counter = 0
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
-  #regex = re.compile(r'(?=^.{1,254}$)(^(?:(?!\d+\.|-)[a-zA-Z0-9_\-]{1,63}(?<!-)\.)+(?:[a-zA-Z]{2,})$)', re.IGNORECASE)
-  regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?', re.IGNORECASE)
+	#regex = re.compile(r'(?=^.{1,254}$)(^(?:(?!\d+\.|-)[a-zA-Z0-9_\-]{1,63}(?<!-)\.)+(?:[a-zA-Z]{2,})$)', re.IGNORECASE)
+	regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,5}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?|'
+		r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))', re.IGNORECASE)
 
-  if regex.match(name):
-    return True
-  else:
-    return False
+	if regex.match(name):
+		return True
+	else:
+		return False
 
 def isURLValid(url) :
-  regex = re.compile(
-        r'^(?:http|ftp)s?://' # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
-        r'localhost|' #localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-        r'(?::\d+)?' # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-  if regex.match(url):
-    return True
-  else:
-    return False
+	#regex = re.compile(
+		#r'^(?:http|ftp)s?://' # http:// or https://
+		#r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+		#r'localhost|' #localhost...
+		#r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+		#r'(?::\d+)?' # optional port
+		#r'(?:/?|[/?]\S+)$', re.IGNORECASE)	
+	regex = re.compile(
+        r'^(?:[a-z0-9\.\-]*)://'  # scheme is validated separately
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
+        r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)        
+	if regex.match(url):
+		return True
+	else:
+		return False
    
+def isPathValid(strg, search=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=;,!]*$').search):
+	return bool(search(strg))    
+
 
 def openFile(filename, mode = 'r'):
 #	if not mode:
@@ -90,8 +104,9 @@ def processResponse(response,url):
 	processedOne()
 
 def processError(error,url):
-    invalid_urls[url] = error.getErrorMessage()
-    processedOne()
+	invalid_urls[url] = error.getErrorMessage()
+	del valid_urls[url]    
+	processedOne()
 
 def processedOne():
 	global added
@@ -108,7 +123,7 @@ def writeInvalidFile(filename):
 	content=""
 	
 	for url in invalid_urls:
-		content += url + "," + `invalid_urls[url]` + "\r\n"
+		content += url + "," + `invalid_urls[url]` + "\n"
 	saveFile(filename, content)
 
 def writeValidFile(filename):
@@ -116,58 +131,71 @@ def writeValidFile(filename):
 	content=""
 	
 	for url in valid_urls:
-		content += url + "," + `valid_urls[url]` + "\r\n"
+		content += url + "," + `valid_urls[url]` + "\n"
 	saveFile(filename, content)
 	
 	
 def parseFile(filename):
-	lines = openFile(filename)
-	global valid_urls,invalid_urls
+	global original_urls ,invalid_urls, fixed_url_counter
+	original_urls = openFile(filename)	
+	schemes = ['http', 'https']
 	
-	for url in lines:
-		url = url.strip()
-		
-		if not isURLValid(url):
-			if not isDomainNameValid(url):
-				invalid_urls[url] = 'MALFORMED'
-				
+	for url in original_urls:
+		url = url.strip()		
+		if not url.startswith('#') :
+			parsed_url = urlparse(url)
+			if not parsed_url.path.startswith('/'):
+				path = parsed_url.path + "/"
 			else:
-				parsed_url = urlparse(url)
-				if not parsed_url.scheme == "http" and not parsed_url.scheme == "https":
-					url = "http://" + url
+				path = parsed_url.path
+				
+			if isURLValid(url) and isDomainNameValid(parsed_url.netloc) and isPathValid(path):
 				valid_urls[url] = ''
-		else:
-			valid_urls[url] = ''
+				#continue
+			elif parsed_url.scheme not in schemes:
+				#TODO: Try to fix white spaces in path
+				url = "http://" + url
+				#parse again the URL
+				parsed_url = urlparse(url)
+				
+				#print "netloc=" + parsed_url.netloc + " - Path=" + parsed_url.path
+				if isDomainNameValid(parsed_url.netloc):
+					fixed_url_counter+=1
+					valid_urls[url] = 'FIXED'
+				else:
+					invalid_urls[url] = 'MALFORMED_PATH_DOMAIN'
+			#elif not isDomainNameValid(parsed_url.netloc) or not isPathValid(parsed_url.path):
+			else:
+				invalid_urls[url] = 'MALFORMED_URL'
+
 
 def search(args):
-	validLines = []
-	invalidLines = []
-	global concurrent
+	global fixed_url_counter, concurrent
 	if args.concurrent_conn > 0 :
 		concurrent = args.concurrent_conn[0]
 
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
 	print "Invalid url's file: " + args.invalid_file[0] + "\n"
-	print "Starting url validation...\n"
 	
 	#Step 1: Load the file and split valid lines from malformed ones
 	parseFile(args.source_file[0])
+	print "Parsing a total of " + `len(original_urls)` + " url's...\n"	
 	print "Number of valid url's: " + `len(valid_urls)`
-	#TODO # of fixed urls
 	print "Number of malformed url's: " + `len(invalid_urls)`
-	print "Number of concurrent connections to launch: " + str(concurrent)
-
+	print "Number of fixed url's: " + `fixed_url_counter`
+	print "Total of parsed url's: " + `len(valid_urls) + len(invalid_urls)`
 	#Step 2: Test valid url's and split the invalid ones (anything that)
-	#doesn't returns a HTTP 200 ok code.
-	print "\nStarting to test valid url's..."
+	#doesn't returns a HTTP 200, 301 or 302 HTTP codes.
+	print "\nTesting valid url's (this can take a while)..."
+	print "Number of concurrent connections to launch: " + str(concurrent)
+	
 	testUrls()
 	print "Done."
-
+	print "\nResults:\n"
 	print "Number of valid url's: " + `len(valid_urls)`
-	print "Number of invalid or malformed url's: " + `len(invalid_urls)`
-	print "Total url's processed: " + `len(valid_urls) + len(invalid_urls)`	
-	print "Writing results to output files...\n"
+	print "Number of malformed url's: " + `len(invalid_urls)`	
+	print "\nWriting results to output files...\n"
 	#Step 3: Save new lists to their respective files
 	writeInvalidFile(args.invalid_file[0])
 	writeValidFile(args.dest_file[0])
