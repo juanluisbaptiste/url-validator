@@ -135,25 +135,37 @@ def writeValidFile(filename):
 	
 	
 def parseFile(filename):
-	lines = openFile(filename)
-	global valid_urls,invalid_urls, fixed_url_counter
+	global original_urls ,invalid_urls, fixed_url_counter
+	original_urls = openFile(filename)	
 	schemes = ['http', 'https']
 	
-	for url in lines:
+	for url in original_urls:
 		url = url.strip()		
 		if not url.startswith('#') :
 			parsed_url = urlparse(url)
-			if parsed_url.scheme not in schemes:
-				#print "Found url missing protocol sheme, fixing it..."
-				new_url = "http://" + url
-				valid_urls[new_url] = 'FIXED'
-				#parse again the URL
-				parsed_url = urlparse(new_url)
-				fixed_url_counter+=1
-			elif isURLValid(url) and isDomainNameValid(parsed_url.netloc):
-				valid_urls[url] = ''
+			if not parsed_url.path.startswith('/'):
+				path = parsed_url.path + "/"
 			else:
-				invalid_urls[url] = 'MALFORMED'
+				path = parsed_url.path
+				
+			if isURLValid(url) and isDomainNameValid(parsed_url.netloc) and isPathValid(path):
+				valid_urls[url] = ''
+				#continue
+			elif parsed_url.scheme not in schemes:
+				#TODO: Try to fix white spaces in path
+				url = "http://" + url
+				#parse again the URL
+				parsed_url = urlparse(url)
+				
+				#print "netloc=" + parsed_url.netloc + " - Path=" + parsed_url.path
+				if isDomainNameValid(parsed_url.netloc):
+					fixed_url_counter+=1
+					valid_urls[url] = 'FIXED'
+				else:
+					invalid_urls[url] = 'MALFORMED_PATH_DOMAIN'
+			#elif not isDomainNameValid(parsed_url.netloc) or not isPathValid(parsed_url.path):
+			else:
+				invalid_urls[url] = 'MALFORMED_URL'
 
 
 def search(args):
@@ -161,18 +173,18 @@ def search(args):
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
 	print "Invalid url's file: " + args.invalid_file[0] + "\n"
-	print "Parsing url's...\n"
 	
 	#Step 1: Load the file and split valid lines from malformed ones
 	parseFile(args.source_file[0])
+	print "Parsing a total of " + `len(original_urls)` + " url's...\n"	
 	print "Number of valid url's: " + `len(valid_urls)`
-	#TODO # of fixed urls
 	print "Number of malformed url's: " + `len(invalid_urls)`
 	print "Number of fixed url's: " + `fixed_url_counter`
+	print "Total of parsed url's: " + `len(valid_urls) + len(invalid_urls)`
 	#Step 2: Test valid url's and split the invalid ones (anything that)
 	#doesn't returns a HTTP 200 ok code.
 	print "\nTesting valid url's..."
-	testUrls()
+	#testUrls()
 	print "Done."
 	
 	print "Writing results to output files...\n"
