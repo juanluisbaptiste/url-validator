@@ -104,8 +104,9 @@ def processResponse(response,url):
 	processedOne()
 
 def processError(error,url):
-    invalid_urls[url] = error.getErrorMessage()
-    processedOne()
+	invalid_urls[url] = error.getErrorMessage()
+	del valid_urls[url]    
+	processedOne()
 
 def processedOne():
 	global added
