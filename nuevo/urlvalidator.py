@@ -187,8 +187,10 @@ def search(args):
 	print "\nTesting valid url's (this can take a while)..."
 	testUrls()
 	print "Done."
-	
-	print "Writing results to output files...\n"
+	print "\nResults:\n"
+	print "Number of valid url's: " + `len(valid_urls)`
+	print "Number of malformed url's: " + `len(invalid_urls)`	
+	print "\nWriting results to output files...\n"
 	#Step 3: Save new lists to their respective files
 	writeInvalidFile(args.invalid_file[0])
 	writeValidFile(args.dest_file[0])
