@@ -13,14 +13,16 @@ concurrent = 400
 finished=itertools.count(1)
 reactor.suggestThreadPoolSize(concurrent)
 added=0
+original_urls = None
 valid_urls = {}
 invalid_urls = {}
 fixed_url_counter = 0
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
-  #regex = re.compile(r'(?=^.{1,254}$)(^(?:(?!\d+\.|-)[a-zA-Z0-9_\-]{1,63}(?<!-)\.)+(?:[a-zA-Z]{2,})$)', re.IGNORECASE)
-	regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?', re.IGNORECASE)
+	#regex = re.compile(r'(?=^.{1,254}$)(^(?:(?!\d+\.|-)[a-zA-Z0-9_\-]{1,63}(?<!-)\.)+(?:[a-zA-Z]{2,})$)', re.IGNORECASE)
+	regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,5}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?|'
+		r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))', re.IGNORECASE)
 
 	if regex.match(name):
 		return True
