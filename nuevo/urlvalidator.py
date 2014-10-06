@@ -171,7 +171,11 @@ def parseFile(filename):
 def search(args):
 	global fixed_url_counter, concurrent
 	if args.concurrent_conn > 0 :
-		concurrent = args.concurrent_conn[0]
+		if args.test_urls :
+			concurrent = args.concurrent_conn[0]
+		else:
+			print "ERROR: concurrent --concurrent-connections (-c) parameter can only be used with --test-urls (-t) parameter"
+			sys.exit(1)
 	reactor.suggestThreadPoolSize(concurrent)
 
 	print "Input file: " + args.source_file[0]
@@ -185,17 +189,19 @@ def search(args):
 	print "Number of malformed url's: " + `len(invalid_urls)`
 	print "Number of fixed url's: " + `fixed_url_counter`
 	print "Total of parsed url's: " + `len(valid_urls) + len(invalid_urls)`
-	#Step 2: Test valid url's and split the invalid ones (anything that)
-	#doesn't returns a HTTP 200, 301 or 302 HTTP codes.
-	print "\nTesting valid url's (this can take a while)..."
-	print "Number of concurrent connections to launch: " + str(concurrent)
 	
-	testUrls()
-	print "Done."
-	print "\nResults:\n"
-	print "Number of valid url's: " + `len(valid_urls)`
-	print "Number of malformed url's: " + `len(invalid_urls)`	
-	print "\nWriting results to output files..."
+	if args.test_urls:
+		#Step 2: Test valid url's and split the invalid ones (anything that)
+		#doesn't returns a HTTP 200, 301 or 302 HTTP codes.
+		print "\nTesting valid url's (this can take a while)..."
+		print "Number of concurrent connections to launch: " + str(concurrent)
+		
+		testUrls()
+		print "Done."
+		print "\nResults:\n"
+		print "Number of valid url's: " + `len(valid_urls)`
+		print "Number of malformed url's: " + `len(invalid_urls)`	
+		print "\nWriting results to output files..."
 	#Step 3: Save new lists to their respective files
 	writeInvalidFile(args.invalid_file[0])
 	writeValidFile(args.dest_file[0])
@@ -220,7 +226,12 @@ def run():
 		      dest='invalid_file', 
 		      nargs=1, 
 		      help='Name of file containing the list of invalid url\'s.', 
-		      required=True)  
+		      required=True)
+	parser.add_argument('-t', '--test-urls', 
+		      #dest='test_urls', 
+		      action='store_true',	      
+		      help='Test valid url\'s to discard the ones with connection problems (timeouts, dns failure, 404 errors, etc).', 
+		      required=False)    	
 	parser.add_argument('-c', '--concurrent-connections', 
 		      dest='concurrent_conn', 
 		      nargs=1, 
