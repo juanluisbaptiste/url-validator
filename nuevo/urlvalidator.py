@@ -75,11 +75,13 @@ def saveFile(filename,content):
             arch.close()
 
 def testUrls():
+	#Add a twisted task per url to test
 	global added
 	for url in valid_urls:
 		added+=1
 		addTask(url)
 
+	#Start the async reactor
 	try:
 		reactor.run()
 	except KeyboardInterrupt:
@@ -89,30 +91,39 @@ def testUrls():
 def getStatus(ourl):
     url = urlparse(ourl)
     conn = httplib.HTTPConnection(url.netloc)   
+    #Only get the HTTP response
     conn.request("HEAD", url.path)
     res = conn.getresponse()
     return res.status
 
 def processResponse(response,url):
+	#process an asyn response
 	global invalid_urls
+	#if the code is any of these valid ones add the url and code to 
+	#valid_urls
 	if response == 200 or response == 301 or response == 302 :
 		valid_urls[url] = response
 	else :
+		#else add it to invalid_urls
 		invalid_urls[url] = response
 		del valid_urls[url]
+	#let the reactor know one more url was processed
 	processedOne()
 
 def processError(error,url):
 	invalid_urls[url] = error.getErrorMessage()
+	#Found an url with a connection error, remove it from the valid list
 	del valid_urls[url]    
 	processedOne()
 
 def processedOne():
+	#Marks a connection as processed
 	global added
 	if finished.next()==added:
 		reactor.stop()
 
 def addTask(url):
+	#Add twisted tasks
     req = threads.deferToThread(getStatus, url)
     req.addCallback(processResponse, url)
     req.addErrback(processError, url)   
@@ -120,7 +131,7 @@ def addTask(url):
 def writeInvalidFile(filename):
 	global invalid_urls
 	content=""
-	
+
 	for url in invalid_urls:
 		content += url + "," + `invalid_urls[url]` + "\n"
 	saveFile(filename, content)
@@ -128,7 +139,7 @@ def writeInvalidFile(filename):
 def writeValidFile(filename):
 	global valid_urls
 	content=""
-	
+
 	for url in valid_urls:
 		content += url + "," + `valid_urls[url]` + "\n"
 	saveFile(filename, content)
@@ -141,35 +152,40 @@ def parseFile(filename):
 	
 	for url in original_urls:
 		url = url.strip()		
-		if not url.startswith('#') :
+		if not url.startswith('#') : #The line isn't commented
 			parsed_url = urlparse(url)
+
 			if not parsed_url.path.startswith('/'):
 				path = parsed_url.path + "/"
 			else:
 				path = parsed_url.path
-				
+
+			#First test to see if the url is valid
 			if isURLValid(url) and isDomainNameValid(parsed_url.netloc) and isPathValid(path):
+				#Add it to valid_urls, it doesn't matter to put something here.
 				valid_urls[url] = ''
-				#continue
+
+			#If the url is missing the HTTP protocol, add it as http
 			elif parsed_url.scheme not in schemes:
 				#TODO: Try to fix white spaces in path
 				url = "http://" + url
 				#parse again the URL
 				parsed_url = urlparse(url)
-				
-				#print "netloc=" + parsed_url.netloc + " - Path=" + parsed_url.path
+
+				#test the url again
 				if isDomainNameValid(parsed_url.netloc):
 					fixed_url_counter+=1
 					valid_urls[url] = 'FIXED'
 				else:
 					invalid_urls[url] = 'MALFORMED_PATH_DOMAIN'
-			#elif not isDomainNameValid(parsed_url.netloc) or not isPathValid(parsed_url.path):
 			else:
 				invalid_urls[url] = 'MALFORMED_URL'
 
 
 def search(args):
 	global fixed_url_counter, concurrent
+
+	#Set cli parameter for concurrent connections
 	if args.concurrent_conn > 0 :
 		if args.test_urls :
 			concurrent = args.concurrent_conn[0]
@@ -181,7 +197,7 @@ def search(args):
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
 	print "Invalid url's file: " + args.invalid_file[0] + "\n"
-	
+
 	#Step 1: Load the file and split valid lines from malformed ones
 	parseFile(args.source_file[0])
 	print "Parsing a total of " + `len(original_urls)` + " url's...\n"	
@@ -189,13 +205,13 @@ def search(args):
 	print "Number of malformed url's: " + `len(invalid_urls)`
 	print "Number of fixed url's: " + `fixed_url_counter`
 	print "Total of parsed url's: " + `len(valid_urls) + len(invalid_urls)`
-	
+
 	if args.test_urls:
 		#Step 2: Test valid url's and split the invalid ones (anything that)
 		#doesn't returns a HTTP 200, 301 or 302 HTTP codes.
 		print "\nTesting valid url's (this can take a while)..."
 		print "Number of concurrent connections to launch: " + str(concurrent)
-		
+
 		testUrls()
 		print "Done."
 		print "\nResults:\n"
