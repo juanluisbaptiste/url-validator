@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import argparse
-from cStringIO import StringIO
 import os
 import re
 import sys
