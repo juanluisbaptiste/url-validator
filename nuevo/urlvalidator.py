@@ -47,7 +47,7 @@ def isURLValid(url) :
 		return True
 	else:
 		return False
-   
+
 def isPathValid(strg, search=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=;,!]*$').search):
 	return bool(search(strg))    
 
@@ -70,7 +70,7 @@ def saveFile(filename,content):
         arch = open(filename, 'w')
         try:
             arch.write(content)
-        finally:	
+        finally:
             arch.close()
 
 def testUrls():
@@ -262,5 +262,5 @@ def run():
 	args.func(args)
 
 if __name__ == "__main__":
-  run()
-  
+    run()
+
