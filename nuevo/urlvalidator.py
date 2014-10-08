@@ -245,7 +245,7 @@ def run():
 	parser.add_argument('-t', '--test-urls', 
 		      #dest='test_urls', 
 		      action='store_true',	      
-		      help='Test valid url\'s to discard the ones with connection problems (timeouts, dns failure, 404 errors, etc).', 
+		      help='Try to connect to valid url\'s to discard the ones with connection problems (timeouts, dns failure, 404 errors, etc).', 
 		      required=False)    	
 	parser.add_argument('-c', '--concurrent-connections', 
 		      dest='concurrent_conn', 
