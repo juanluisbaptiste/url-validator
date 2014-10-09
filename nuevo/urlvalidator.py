@@ -83,7 +83,7 @@ def testUrls():
 def handle_request(response):
     global url_counter, processed_urls_counter, valid_urls_counter
     if response.error:
-        invalid_urls[response.request.url] = response.error
+        invalid_urls[response.request.url] = `response.code` + " - " + response.reason
         #Found an url with a connection error, remove it from the valid list    
         del valid_urls[response.request.url]
 
