@@ -115,46 +115,6 @@ def handle_request(response):
         print "Finishing off...\n"        
         tornado.ioloop.IOLoop.instance().stop()
 
-def getStatus(ourl):
-    url = urlparse(ourl)
-    conn = httplib.HTTPConnection(url.netloc)   
-    #Only get the HTTP response
-    conn.request("HEAD", url.path)
-    res = conn.getresponse()
-    return res.status
-
-def processResponse(response,url):
-	#process an asyn response
-	global invalid_urls
-	#if the code is any of these valid ones add the url and code to 
-	#valid_urls
-	if response == 200 or response == 301 or response == 302 :
-		valid_urls[url] = response
-	else :
-		#else add it to invalid_urls
-		invalid_urls[url] = response
-		del valid_urls[url]
-	#let the reactor know one more url was processed
-	processedOne()
-
-def processError(error,url):
-	invalid_urls[url] = error.getErrorMessage()
-	#Found an url with a connection error, remove it from the valid list
-	del valid_urls[url]    
-	processedOne()
-
-def processedOne():
-	#Marks a connection as processed
-	global added
-	if finished.next()==added:
-		reactor.stop()
-
-def addTask(url):
-	#Add twisted tasks
-    req = threads.deferToThread(getStatus, url)
-    req.addCallback(processResponse, url)
-    req.addErrback(processError, url)   
-    
 def writeInvalidFile(filename):
 	global invalid_urls
 	content=""
@@ -221,7 +181,6 @@ def search(args):
 		else:
 			print "ERROR: concurrent --concurrent-connections (-c) parameter can only be used with --test-urls (-t) parameter"
 			sys.exit(1)
-	reactor.suggestThreadPoolSize(concurrent)
 
 	print "Input file: " + args.source_file[0]
 	print "Output file: " + args.dest_file[0]
