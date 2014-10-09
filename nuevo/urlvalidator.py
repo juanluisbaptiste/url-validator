@@ -163,7 +163,7 @@ def search(args):
     #Set cli parameter for concurrent connections
     if args.concurrent_conn > 0 :
         if args.test_urls :
-            concurrent = args.concurrent_conn[0]
+            concurrent = int(args.concurrent_conn[0])
         else:
             print "ERROR: concurrent --concurrent-connections (-c) parameter can only be used with --test-urls (-t) parameter"
             sys.exit(1)
