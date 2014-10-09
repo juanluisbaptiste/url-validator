@@ -179,20 +179,22 @@ def search(args):
     print "Number of fixed url's: " + `fixed_url_counter`
     print "Number of malformed url's: " + `len(invalid_urls)`
     print "Number of duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
-    print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
 
     if args.test_urls:
         #Step 2: Test valid url's and split the invalid ones (anything that)
         #doesn't returns a HTTP 200, 301 or 302 HTTP codes.
         print "Testing valid url's (this can take a while)..."
-        print "Number of concurrent connections to launch: " + str(concurrent)
+        print "Concurrent connections: " + str(concurrent)
 
         testUrls()
         print "Done."
+        print "Found " + `valid_urls_counter - processed_urls_counter` + " invalid url's"
         print "\nResults:\n"
         print "Number of valid url's: " + `len(valid_urls)`
-        print "Number of malformed url's: " + `len(invalid_urls)`
+        print "Number of invalid url's: " + `len(invalid_urls)`
         print "\nWriting results to output files..."
+    print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
+        
     #Step 3: Save new lists to their respective files
     writeInvalidFile(args.invalid_file[0])
     writeValidFile(args.dest_file[0])
