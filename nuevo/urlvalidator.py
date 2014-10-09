@@ -4,17 +4,21 @@ import os
 import re
 import sys
 from urlparse import urlparse
-from twisted.internet import reactor, threads
 import httplib
 import itertools
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+import tornado.ioloop
 
 concurrent = 200
 finished=itertools.count(1)
 added=0
 original_urls = None
 valid_urls = {}
+valid_urls_counter = 0
 invalid_urls = {}
+url_counter = 0
 fixed_url_counter = 0
+processed_urls_counter = 0
 
 def isDomainNameValid ( name ):
   # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
@@ -74,18 +78,42 @@ def saveFile(filename,content):
             arch.close()
 
 def testUrls():
-	#Add a twisted task per url to test
-	global added
-	for url in valid_urls:
-		added+=1
-		addTask(url)
+    global concurrent
+    AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
+    #This is supposedly to work
+    http_client = AsyncHTTPClient(max_clients=concurrent)
+    for url in valid_urls:
+        request = HTTPRequest(url,method="HEAD",
+                              body=None, 
+#                             request_timeout = 10.0,
+#                             connect_timeout = 10.0,
+#                             follow_redirects=self._follow_redirects,                              
+                              validate_cert=False)
+        http_client.fetch(request, handle_request)
+    tornado.ioloop.IOLoop.instance().start() # start the tornado ioloop to listen for events
 
-	#Start the async reactor
-	try:
-		reactor.run()
-	except KeyboardInterrupt:
-		reactor.stop()
+def handle_request(response):
+    global url_counter, processed_urls_counter, valid_urls_counter
+    if response.error:
+        invalid_urls[response.request.url] = response.error
+        #Found an url with a connection error, remove it from the valid list    
+        del valid_urls[response.request.url]
 
+    else:
+        #if the code is any of these valid ones add the url and code to 
+        #valid_urls
+        if response.code < 400:
+            valid_urls[response.request.url] = response.code
+        else :
+            #else add it to invalid_urls
+            invalid_urls[response.request.url] = response.reason
+            del valid_urls[response.request.url]
+    processed_urls_counter += 1
+    print "Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url      
+    if (processed_urls_counter >= len(valid_urls)):
+        print "Found " + `valid_urls_counter - processed_urls_counter` + " invalid url's"
+        print "Finishing off...\n"        
+        tornado.ioloop.IOLoop.instance().stop()
 
 def getStatus(ourl):
     url = urlparse(ourl)
@@ -145,13 +173,14 @@ def writeValidFile(filename):
 	
 	
 def parseFile(filename):
-	global original_urls ,invalid_urls, fixed_url_counter
+	global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter
 	original_urls = openFile(filename)	
 	schemes = ['http', 'https']
 	
 	for url in original_urls:
 		url = url.strip()		
 		if not url.startswith('#') : #The line isn't commented
+			url_counter += 1            
 			parsed_url = urlparse(url)
 
 			if not parsed_url.path.startswith('/'):
@@ -179,10 +208,11 @@ def parseFile(filename):
 					invalid_urls[url] = 'MALFORMED_PATH_DOMAIN'
 			else:
 				invalid_urls[url] = 'MALFORMED_URL'
+    	valid_urls_counter = len(valid_urls)
 
 
 def search(args):
-	global fixed_url_counter, concurrent
+	global url_counter,fixed_url_counter, concurrent
 
 	#Set cli parameter for concurrent connections
 	if args.concurrent_conn > 0 :
@@ -199,12 +229,12 @@ def search(args):
 
 	#Step 1: Load the file and split valid lines from malformed ones
 	parseFile(args.source_file[0])
-	print "Parsing a total of " + `len(original_urls)` + " url's...\n"	
+	print "Parsing a total of " + `url_counter` + " url's...\n"	
 	print "Number of non-malformed url's: " + `len(valid_urls)`
 	print "Number of fixed url's: " + `fixed_url_counter`
 	#print "Total of valid url's: " + `fixed_url_counter + len(valid_urls)`
 	print "Number of malformed url's: " + `len(invalid_urls)`
-	print "Number of duplicated url's: " + `len(original_urls) - len(valid_urls) - len(invalid_urls)`
+	print "Number of duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
 	print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
 
 	if args.test_urls:
