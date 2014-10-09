@@ -152,9 +152,8 @@ def parseFile(filename):
 			if isURLValid(url) and isDomainNameValid(parsed_url.netloc) and isPathValid(path):
 				#Add it to valid_urls, it doesn't matter to put something here.
 				valid_urls[url] = ''
-
-			#If the url is missing the HTTP protocol, add it as http
-			elif parsed_url.scheme not in schemes:
+                #If the url is missing the HTTP protocol, add it as http
+	        elif parsed_url.scheme not in schemes:
 				#TODO: Try to fix white spaces in path
 				url = "http://" + url
 				#parse again the URL
@@ -166,8 +165,8 @@ def parseFile(filename):
 					valid_urls[url] = 'FIXED'
 				else:
 					invalid_urls[url] = 'MALFORMED_PATH_DOMAIN'
-			else:
-				invalid_urls[url] = 'MALFORMED_URL'
+        else:
+			invalid_urls[url] = 'MALFORMED_URL'
     	valid_urls_counter = len(valid_urls)
 
 
