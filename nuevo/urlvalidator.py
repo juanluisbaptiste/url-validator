@@ -18,6 +18,7 @@ invalid_urls = {}
 url_counter = 0
 fixed_url_counter = 0
 processed_urls_counter = 0
+verboseprint = None
 
 def isDomainNameValid ( name ):
     # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
@@ -97,9 +98,8 @@ def handle_request(response):
             invalid_urls[response.request.url] = response.reason
             del valid_urls[response.request.url]
     processed_urls_counter += 1
-    print "Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url      
+    verboseprint("Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url)
     if (processed_urls_counter >= len(valid_urls)):
-        print "Found " + `valid_urls_counter - processed_urls_counter` + " invalid url's"
         print "Finishing off...\n"        
         tornado.ioloop.IOLoop.instance().stop()
 
@@ -158,7 +158,17 @@ def parseFile(filename):
 
 
 def search(args):
-    global url_counter,fixed_url_counter, concurrent
+    global url_counter,fixed_url_counter, concurrent, verboseprint
+    if args.verbose:
+        def _verboseprint(*args):
+            # Print each argument separately so caller doesn't need to
+            # stuff everything to be printed into a single string
+            for arg in args:
+                print arg,
+            print
+    else:   
+        _verboseprint = lambda *a: None  
+    verboseprint = _verboseprint    
 
     #Set cli parameter for concurrent connections
     if args.concurrent_conn > 0 :
