@@ -69,7 +69,6 @@ def saveFile(filename,content):
 def testUrls():
     global concurrent
     AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
-    #This is supposedly to work
     http_client = AsyncHTTPClient(max_clients=concurrent)
     for url in valid_urls:
         request = HTTPRequest(url,method="HEAD",
@@ -178,7 +177,6 @@ def search(args):
     print "Parsing a total of " + `url_counter` + " url's...\n"
     print "Number of non-malformed url's: " + `len(valid_urls)`
     print "Number of fixed url's: " + `fixed_url_counter`
-    #print "Total of valid url's: " + `fixed_url_counter + len(valid_urls)`
     print "Number of malformed url's: " + `len(invalid_urls)`
     print "Number of duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
     print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
