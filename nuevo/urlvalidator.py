@@ -47,8 +47,8 @@ def isURLValid(url) :
     else:
         return False
 
-def isPathValid(strg, search=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=;,!]*$').search):
-    return bool(search(strg))
+def isPathValid(strg, start=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=;,!]*$').search):
+    return bool(start(strg))
 
 
 def openFile(filename, mode = 'r'):
@@ -169,7 +169,7 @@ def parseFile(filename):
         invalid_urls_counter = len(invalid_urls)
 
 
-def search(args):
+def start(args):
     global url_counter,fixed_url_counter, concurrent, verboseprint, invalid_urls_counter
 
     if args.verbose:
@@ -258,7 +258,7 @@ def run():
               help='Verbose output.')
     parser.add_argument('--version', action='version', version='urlvalidator 0.1 \n')
 
-    parser.set_defaults(func=search)
+    parser.set_defaults(func=start)
     args = parser.parse_args()
     args.func(args)
 
