@@ -240,17 +240,17 @@ def run():
     parser.add_argument('-d', '--dest',
               dest='dest_file',
               nargs=1,
-              help='Name of file containing the list of valid url\'s.',
+              help='Name of file to save the list of valid url\'s.',
               required=True)
     parser.add_argument('-i', '--invalid',
               dest='invalid_file',
               nargs=1,
-              help='Name of file containing the list of invalid url\'s.',
+              help='Name of file to save the list of invalid url\'s.',
               required=True)
     parser.add_argument('-t', '--test-urls',
               #dest='test_urls',
               action='store_true',
-              help='Try to connect to valid url\'s to discard the ones with connection problems (timeouts, dns failure, 404 errors, etc).',
+              help='Try to connect to valid url\'s to discard the ones with errors (timeouts, dns failure, HTTP errors >= 400 , etc).',
               required=False)
     parser.add_argument('-c', '--concurrent-connections',
               dest='concurrent_conn',
