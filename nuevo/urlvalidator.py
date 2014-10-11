@@ -224,10 +224,10 @@ def parsingFileStats(args):
 
 
 def testUrlsStats():
-    print "\nFound " + `len(invalid_urls)` + " invalid url's"
+    print "\nFound " + `invalid_urls_counter` + " invalid url's"
     print "\nResults:\n"
     print "Valid url's: " + `len(valid_urls)`
-    print "Invalid url's: " + `len(invalid_urls)`
+    print "Total invalid url's: " + `len(invalid_urls)`
 
 def run():
     global concurrent
