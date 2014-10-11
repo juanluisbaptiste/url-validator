@@ -5,6 +5,8 @@ import re
 import sys
 from urlparse import urlparse
 import itertools
+import signal 
+import sys
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import tornado.ioloop
 
@@ -24,6 +26,12 @@ fixed_url_counter = 0
 processed_urls_counter = 0
 verboseprint = None
 
+def signal_handler(signal, frame):
+    print "\nUser pressed Ctrl-C, stopping..."
+    stopTest()
+    sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+    
 def isDomainNameValid ( name ):
     # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
     regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,5}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?|'
@@ -87,6 +95,11 @@ def testUrls():
         http_client.fetch(request, handle_request)
     tornado.ioloop.IOLoop.instance().start() # start the tornado ioloop to listen for events
 
+
+def stopTest():
+    verboseprint("Finishing off...\n")
+    return tornado.ioloop.IOLoop.instance().stop()
+
 def handle_request(response):
     global url_counter, processed_urls_counter, valid_urls_counter, invalid_urls_counter
 
@@ -112,8 +125,7 @@ def handle_request(response):
     verboseprint("Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url)
     #If all urls have been processed, stop the IOLoop
     if (processed_urls_counter == valid_urls_counter):
-        verboseprint("Finishing off...\n")
-        tornado.ioloop.IOLoop.instance().stop()
+        stopTest()
 
 def writeInvalidFile(filename):
     global invalid_urls
