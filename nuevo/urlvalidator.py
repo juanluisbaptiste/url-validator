@@ -72,8 +72,11 @@ def saveFile(filename,content):
 
 def testUrls():
     global concurrent, request_timeout, connect_timeout
+    #Use the curl implementation for better performance
+
     AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
     http_client = AsyncHTTPClient(max_clients=concurrent)
+
     for url in valid_urls:
         request = HTTPRequest(url,method="HEAD",
                               body=None, 
@@ -101,9 +104,13 @@ def handle_request(response):
             #else add it to invalid_urls
             invalid_urls[response.request.url] = response.reason
             del valid_urls[response.request.url]
+            invalid_urls_counter += 1
+
+    #Count this url as processed
     processed_urls_counter += 1
     verboseprint("Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url)
     if (processed_urls_counter >= len(valid_urls)):
+    #If all urls have been processed, stop the IOLoop
         print "Finishing off...\n"        
         tornado.ioloop.IOLoop.instance().stop()
 
