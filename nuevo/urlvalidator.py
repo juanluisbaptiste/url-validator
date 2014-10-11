@@ -207,8 +207,7 @@ def start(args):
         #Step 2: Test valid url's and split the invalid ones (anything that)
         #doesn't returns a HTTP 200, 301 or 302 HTTP codes.
         print "\nTesting valid url's (this can take a while)..."
-        print "Concurrent connections: " + str(concurrent) + "\n"
-
+        verboseprint("Concurrent connections: " + str(concurrent) + "\n")
         testUrls()
         print "Done."
         print "\nFound " + `len(invalid_urls)` + " invalid url's"
@@ -219,6 +218,7 @@ def start(args):
     print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
         
     #Step 3: Save new lists to their respective files
+    verboseprint("\nWriting results to output files...")
     writeInvalidFile(args.invalid_file[0])
     writeValidFile(args.dest_file[0])
 
