@@ -191,17 +191,9 @@ def start(args):
             print "ERROR: concurrent --concurrent-connections (-c) parameter can only be used with --test-urls (-t) parameter"
             sys.exit(1)
 
-    print "Input file: " + args.source_file[0]
-    print "Output file: " + args.dest_file[0]
-    print "Invalid url's file: " + args.invalid_file[0] + "\n"
-
     #Step 1: Load the file and split valid lines from malformed ones
     parseFile(args.source_file[0])
-    print "Parsing a total of " + `url_counter` + " url's...\n"
-    print "Non-malformed url's: " + `len(valid_urls)`
-    print "Fixed url's: " + `fixed_url_counter`
-    print "Malformed url's: " + `invalid_urls_counter`
-    print "Duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
+    parsingFileStats(args)
 
     if args.test_urls:
         #Step 2: Test valid url's and split the invalid ones (anything that)
@@ -210,18 +202,30 @@ def start(args):
         verboseprint("Concurrent connections: " + str(concurrent) + "\n")
         testUrls()
         print "Done."
-        print "\nFound " + `len(invalid_urls)` + " invalid url's"
-        print "\nResults:\n"
-        print "Valid url's: " + `len(valid_urls)`
-        print "Invalid url's: " + `len(invalid_urls)`
-        print "\nWriting results to output files..."
-    print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
+        testUrlsStats()
+    print "Total of parsed url's: " + `len(valid_urls) + len(invalid_urls)`
         
     #Step 3: Save new lists to their respective files
     verboseprint("\nWriting results to output files...")
     writeInvalidFile(args.invalid_file[0])
     writeValidFile(args.dest_file[0])
 
+def parsingFileStats(args):
+    print "Input file: " + args.source_file[0]
+    print "Output file: " + args.dest_file[0]
+    print "Invalid url's file: " + args.invalid_file[0] + "\n"
+    print "Parsing a total of " + `url_counter` + " url's...\n"
+    print "Non-malformed url's: " + `len(valid_urls)`
+    print "Fixed url's: " + `fixed_url_counter`
+    print "Malformed url's: " + `invalid_urls_counter`
+    print "Duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
+
+
+def testUrlsStats():
+    print "\nFound " + `len(invalid_urls)` + " invalid url's"
+    print "\nResults:\n"
+    print "Valid url's: " + `len(valid_urls)`
+    print "Invalid url's: " + `len(invalid_urls)`
 
 def run():
     global concurrent
