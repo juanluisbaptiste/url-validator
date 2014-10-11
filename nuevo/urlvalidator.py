@@ -15,7 +15,6 @@ connect_timeout = HTTPRequest._DEFAULTS["connect_timeout"]
 concurrent = 200
 request = None
 finished=itertools.count(1)
-added=0
 original_urls = None
 valid_urls = {}
 valid_urls_counter = 0
