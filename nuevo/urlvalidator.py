@@ -111,7 +111,7 @@ def handle_request(response):
     verboseprint("Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url)
     #If all urls have been processed, stop the IOLoop
     if (processed_urls_counter == valid_urls_counter):
-        print "Finishing off...\n"        
+        verboseprint("Finishing off...\n")
         tornado.ioloop.IOLoop.instance().stop()
 
 def writeInvalidFile(filename):
