@@ -200,6 +200,8 @@ def start(args):
         #doesn't returns a HTTP 200, 301 or 302 HTTP codes.
         print "\nTesting valid url's (this can take a while)..."
         verboseprint("Concurrent connections: " + str(concurrent) + "\n")
+        #reset invalid urls counter to count for urls with errors
+        invalid_urls_counter = 0
         testUrls()
         print "Done."
         testUrlsStats()
