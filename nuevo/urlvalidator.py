@@ -109,8 +109,8 @@ def handle_request(response):
     #Count this url as processed
     processed_urls_counter += 1
     verboseprint("Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url)
-    if (processed_urls_counter >= len(valid_urls)):
     #If all urls have been processed, stop the IOLoop
+    if (processed_urls_counter == valid_urls_counter):
         print "Finishing off...\n"        
         tornado.ioloop.IOLoop.instance().stop()
 
