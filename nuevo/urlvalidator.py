@@ -17,6 +17,7 @@ original_urls = None
 valid_urls = {}
 valid_urls_counter = 0
 invalid_urls = {}
+invalid_urls_counter = 0
 url_counter = 0
 fixed_url_counter = 0
 processed_urls_counter = 0
@@ -83,12 +84,14 @@ def testUrls():
     tornado.ioloop.IOLoop.instance().start() # start the tornado ioloop to listen for events
 
 def handle_request(response):
-    global url_counter, processed_urls_counter, valid_urls_counter
+    global url_counter, processed_urls_counter, valid_urls_counter, invalid_urls_counter
+
+    #Handle error responses (DNS failures, timeouts, etc)
     if response.error:
         invalid_urls[response.request.url] = `response.code` + " - " + response.reason
         #Found an url with a connection error, remove it from the valid list    
         del valid_urls[response.request.url]
-
+        invalid_urls_counter += 1
     else:
         #if the code is any of these valid ones add the url and code to 
         #valid_urls
@@ -121,7 +124,7 @@ def writeValidFile(filename):
     saveFile(filename, content)
 
 def parseFile(filename):
-    global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter
+    global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter, invalid_urls_cunter
     original_urls = openFile(filename)
     schemes = ['http', 'https']
     
@@ -156,10 +159,12 @@ def parseFile(filename):
             else:
                 invalid_urls[url] = 'MALFORMED_URL'
         valid_urls_counter = len(valid_urls)
+        invalid_urls_cunter = len(invalid_urls)
 
 
 def search(args):
-    global url_counter,fixed_url_counter, concurrent, verboseprint
+    global url_counter,fixed_url_counter, concurrent, verboseprint, invalid_urls_counter
+
     if args.verbose:
         def _verboseprint(*args):
             # Print each argument separately so caller doesn't need to
@@ -188,7 +193,7 @@ def search(args):
     print "Parsing a total of " + `url_counter` + " url's...\n"
     print "Number of non-malformed url's: " + `len(valid_urls)`
     print "Number of fixed url's: " + `fixed_url_counter`
-    print "Number of malformed url's: " + `len(invalid_urls)`
+    print "Number of malformed url's: " + `invalid_urls_counter`
     print "Number of duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
 
     if args.test_urls:
@@ -199,7 +204,7 @@ def search(args):
 
         testUrls()
         print "Done."
-        print "Found " + `valid_urls_counter - processed_urls_counter` + " invalid url's"
+        print "\nFound " + `len(invalid_urls)` + " invalid url's"
         print "\nResults:\n"
         print "Number of valid url's: " + `len(valid_urls)`
         print "Number of invalid url's: " + `len(invalid_urls)`
