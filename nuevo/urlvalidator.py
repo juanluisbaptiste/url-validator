@@ -198,23 +198,23 @@ def search(args):
     #Step 1: Load the file and split valid lines from malformed ones
     parseFile(args.source_file[0])
     print "Parsing a total of " + `url_counter` + " url's...\n"
-    print "Number of non-malformed url's: " + `len(valid_urls)`
-    print "Number of fixed url's: " + `fixed_url_counter`
-    print "Number of malformed url's: " + `invalid_urls_counter`
-    print "Number of duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
+    print "Non-malformed url's: " + `len(valid_urls)`
+    print "Fixed url's: " + `fixed_url_counter`
+    print "Malformed url's: " + `invalid_urls_counter`
+    print "Duplicated url's: " + `url_counter - len(valid_urls) - len(invalid_urls)`
 
     if args.test_urls:
         #Step 2: Test valid url's and split the invalid ones (anything that)
         #doesn't returns a HTTP 200, 301 or 302 HTTP codes.
-        print "Testing valid url's (this can take a while)..."
-        print "Concurrent connections: " + str(concurrent)
+        print "\nTesting valid url's (this can take a while)..."
+        print "Concurrent connections: " + str(concurrent) + "\n"
 
         testUrls()
         print "Done."
         print "\nFound " + `len(invalid_urls)` + " invalid url's"
         print "\nResults:\n"
-        print "Number of valid url's: " + `len(valid_urls)`
-        print "Number of invalid url's: " + `len(invalid_urls)`
+        print "Valid url's: " + `len(valid_urls)`
+        print "Invalid url's: " + `len(invalid_urls)`
         print "\nWriting results to output files..."
     print "\nTotal of parsed url's: " + `len(valid_urls) + len(invalid_urls)` + "\n"
         
