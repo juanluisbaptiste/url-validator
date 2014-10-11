@@ -11,6 +11,7 @@ import tornado.ioloop
 request_timeout = HTTPRequest._DEFAULTS["request_timeout"]
 connect_timeout = HTTPRequest._DEFAULTS["connect_timeout"]
 concurrent = 200
+request = None
 finished=itertools.count(1)
 added=0
 original_urls = None
@@ -71,7 +72,7 @@ def saveFile(filename,content):
             arch.close()
 
 def testUrls():
-    global concurrent, request_timeout, connect_timeout
+    global concurrent, request_timeout, connect_timeout, request
     #Use the curl implementation for better performance
 
     AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
