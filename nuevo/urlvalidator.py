@@ -131,7 +131,7 @@ def writeValidFile(filename):
     saveFile(filename, content)
 
 def parseFile(filename):
-    global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter, invalid_urls_cunter
+    global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter, invalid_urls_counter
     original_urls = openFile(filename)
     schemes = ['http', 'https']
     
@@ -166,7 +166,7 @@ def parseFile(filename):
             else:
                 invalid_urls[url] = 'MALFORMED_URL'
         valid_urls_counter = len(valid_urls)
-        invalid_urls_cunter = len(invalid_urls)
+        invalid_urls_counter = len(invalid_urls)
 
 
 def search(args):
