@@ -19,6 +19,7 @@ import sys
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import tornado.ioloop
 
+__version__ = 0.1
 request_timeout = HTTPRequest._DEFAULTS["request_timeout"]
 connect_timeout = HTTPRequest._DEFAULTS["connect_timeout"]
 concurrent = 200
@@ -472,7 +473,7 @@ def run():
     parser.add_argument('--verbose', '-v',
               action='count',
               help='Verbose output.')
-    parser.add_argument('--version', action='version', version='urlvalidator 0.1 \n')
+    parser.add_argument('--version', action='version', version='urlvalidator ' + `__version__`)
 
     parser.set_defaults(func=start)
     args = parser.parse_args()
