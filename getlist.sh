@@ -25,8 +25,13 @@ else
     archivo_csv=$archivo
 fi    
 
-iconv -f ISO-8859-1 -t utf-8 $archivo_csv > IXP.raw.utf8
+#iconv -f ISO-8859-1 -t utf-8 $archivo_csv > IXP.raw.utf8
 
-sort IXP.raw.utf8 | uniq | tee IXP.raw.utf8.sorted &>/dev/null
-python parser.py
-sort IXP.raw.utf8.sorted.ok | uniq | tee IXP.txt &>/dev/null
+#sort IXP.raw.utf8 | uniq | tee IXP.raw.utf8.sorted &>/dev/null
+python urlvalidator.py -t -s $archivo_csv -d validas.txt -i invalidas.txt
+#sort IXP.raw.utf8.sorted.ok | uniq | tee IXP.txt &>/dev/null
+
+while read line
+do           
+	echo $line | sed -r 's/^.{7}// >> validas_sin_http.txt'
+done < validas.txt
