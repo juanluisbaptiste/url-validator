@@ -75,8 +75,8 @@ def isDomainNameValid ( name ):
     # TODO: Works but accepts hostnames with a name of at least 3 characters with no domain. ie. www instead of www.test.com
     # TODO: Handle special URLs like about:, file, chrome:, etc
     regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,5}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?|'
-        r'localhost|'  # localhost...
-        r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))', re.IGNORECASE)
+        r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))'
+                r'localhost|' , re.IGNORECASE)
 
     if regex.match(name):
         return True
