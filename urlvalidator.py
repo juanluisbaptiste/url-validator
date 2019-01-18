@@ -113,7 +113,7 @@ def isURLValid(url) :
     else:
         return False
 
-def isPathValid(strg, start=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=;,!]*$').search):
+def isPathValid(strg, start=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=@&()*;,!]*$').search):
     """
     Checks if the path part of an url is valid (ie: /foo)
 
