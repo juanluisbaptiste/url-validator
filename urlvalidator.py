@@ -309,7 +309,7 @@ def parseFile(filename):
     """
     global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter, invalid_urls_counter
     original_urls = openFile(filename)
-    schemes = ['http', 'https', 'chrome', 'about']
+    schemes = ['http', 'https', 'file', 'chrome', 'about']
 
     for url in original_urls:
         url = url.strip()
