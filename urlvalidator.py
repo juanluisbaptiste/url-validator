@@ -325,7 +325,7 @@ def parseFile(filename):
             #First test to see if the url is valid
             if isURLValid(url) and isDomainNameValid(parsed_url.netloc) and isPathValid(path):
                 #Add it to valid_urls, it doesn't matter to put something here.
-                valid_urls[url] = ''
+                valid_urls[url] = 'OK'
                 #If the url is missing the HTTP protocol, add it as http
             elif parsed_url.scheme not in schemes:
                 #TODO: Try to fix white spaces in path
