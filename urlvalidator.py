@@ -297,20 +297,20 @@ def writeValidFile(filename):
 
 def parseFile(filename):
     """
-    Parses the input file separating the malformed url's 
-    from the non-malformed ones. 
+    Parses the input file separating the malformed url's
+    from the non-malformed ones.
 
     Parameters
     ----------
 
-    filename : string 
-        Path to the file to open.    
+    filename : string
+        Path to the file to open.
 
-    """    
+    """
     global url_counter,original_urls ,invalid_urls, fixed_url_counter, valid_urls_counter, invalid_urls_counter
     original_urls = openFile(filename)
-    schemes = ['http', 'https']
-    
+    schemes = ['http', 'https', 'chrome', 'about']
+
     for url in original_urls:
         url = url.strip()
         if not url.startswith('#') : #The line isn't commented
