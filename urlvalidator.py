@@ -18,7 +18,7 @@ import signal
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import tornado.ioloop
 
-__version__ = 0.1
+__version__ = "0.1.1"
 request_timeout = HTTPRequest._DEFAULTS["request_timeout"]
 connect_timeout = HTTPRequest._DEFAULTS["connect_timeout"]
 concurrent = 200
