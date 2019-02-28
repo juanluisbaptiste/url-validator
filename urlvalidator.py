@@ -439,14 +439,14 @@ def testUrlsStats():
 
 def run():
     """
-    Main function, handles the command line parameters 
-    and calls the start() function to process them and 
+    Main function, handles the command line parameters
+    and calls the start() function to process them and
     start the tests.
     """
     global concurrent
     # create the top-level parser
-    parser = argparse.ArgumentParser(description='Apukay Security URL Validator Tool.',
-                  epilog='Apukay Security. - All rights reserved 2014')
+    parser = argparse.ArgumentParser(description='URL Validator Tool.',
+                  epilog='All rights reserved 2014-2019')
     parser.add_argument('-s', '--source',
               dest='source_file',
               nargs=1,
