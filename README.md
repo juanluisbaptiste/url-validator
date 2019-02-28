@@ -2,7 +2,19 @@
 
 Validate a list of URL's and save the results into a file.
 
-Options:
+I developed this tool for work some time ago. At the time, we periodically
+received from a partner a file with a list of URL that we needed to be
+loaded in some software. The problem was that the file came with URL's
+full of errors, non-existent or non-accessible ones. So we needed to
+validate the file, try to fix the url's with syntax errors, and split
+the invalid ones from the good ones.
+
+Nowadays I use it to validate my [OneTab](https://www.one-tab.com/) URL list.
+
+## Getting Started
+
+This is the full list of options:
+
 
 ```
 usage: urlvalidator.py [-h] -s SOURCE_FILE -d DEST_FILE -i INVALID_FILE [-t]
@@ -28,7 +40,24 @@ optional arguments:
   --version             show program's version number and exit
 ```
 
+For example, use the included example file [tests_files](test_files/urls.txt). To test it only for syntax errors:
 
+```
+python urlvalidator.py -s test_files/urls.txt -d valids.txt -i invalids.txt
+```
+
+To also invoke them to test if they are valid url's (they return a 200 HTTP code) add the `-t` option:
+
+```
+python urlvalidator.py -s test_files/urls.txt -d valids.txt -i invalids.txt -t
+```
+
+### Prerequisites
+
+What things you need to install the software and how to install them
+
+- Python 2.7.x
+- Python Tornado library installed
 
 ## License
 
