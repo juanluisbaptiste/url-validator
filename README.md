@@ -1,15 +1,15 @@
 # URL Validator
 
-Validate a list of URL's and save the results into a file.
+Validate a list of url's and save the results into a file.
 
 I developed this tool for work some time ago. At the time, we periodically
-received from a partner a file with a list of URL that we needed to be
-loaded in some software. The problem was that the file came with URL's
+received from a partner a file with a list of url that we needed to be
+loaded in some software. The problem was that the file came with url's
 full of errors, non-existent or non-accessible ones. So we needed to
 validate the file, try to fix the url's with syntax errors, and split
 the invalid ones from the good ones.
 
-Nowadays I use it to validate my [OneTab](https://www.one-tab.com/) URL list.
+Nowadays I use it to validate my [OneTab](https://www.one-tab.com/) url list.
 
 ## Getting Started
 
