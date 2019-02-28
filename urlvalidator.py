@@ -329,7 +329,7 @@ def parseFile(filename):
                 #If the url is missing the HTTP protocol, add it as http
             elif parsed_url.scheme not in schemes:
                 #TODO: Try to fix white spaces in path
-                url = "http://" + url
+                url = "https://" + url
                 #parse again the URL
                 parsed_url = urlparse(url)
 
