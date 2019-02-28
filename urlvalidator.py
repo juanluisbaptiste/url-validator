@@ -79,8 +79,8 @@ def isDomainNameValid(name):
     # with no domain. ie. www instead of www.test.com
     # TODO: Handle special URLs like about:, file, chrome:, etc
     regex = re.compile(r'[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,5}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?|'
-        r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))'
-                r'localhost|' , re.IGNORECASE)
+                       r'(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9])[.]){3}(([2]([0-4][0-9]|[5][0-5])|[0-1]?[0-9]?[0-9]))'
+                       r'localhost|', re.IGNORECASE)
 
     if regex.match(name):
         return True
@@ -119,7 +119,8 @@ def isURLValid(url):
         return False
 
 
-def isPathValid(strg, start=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=@&()*;,!]*$').search):
+def isPathValid(strg,
+                start=re.compile(r'^\/[/.a-zA-Z0-9-~_+:%=@&()*;,!]*$').search):
     """
     Checks if the path part of an url is valid (ie: /foo)
 
@@ -242,11 +243,15 @@ def handle_request(response):
         HTTP response object.
 
     """
-    global url_counter, processed_urls_counter, valid_urls_counter, invalid_urls_counter
+    global url_counter
+    global processed_urls_counter
+    global valid_urls_counter
+    global invalid_urls_counter
 
     # Handle error responses (DNS failures, timeouts, etc)
     if response.error:
-        invalid_urls[response.request.url] = repr(response.code) + " - " + response.reason
+        invalid_urls[response.request.url] = repr(response.code) \
+            + " - " + response.reason
         # Found an url with a connection error, remove it from the valid list
         del valid_urls[response.request.url]
         invalid_urls_counter += 1
@@ -263,7 +268,8 @@ def handle_request(response):
 
     # Count this url as processed
     processed_urls_counter += 1
-    verboseprint("Processed url " + `processed_urls_counter` + " of " + `valid_urls_counter` + " " + response.request.url)
+    verboseprint("Processed url " + repr(processed_urls_counter) + " of " +
+                 repr(valid_urls_counter) + " " + response.request.url)
     # If all urls have been processed, stop the IOLoop
     if (processed_urls_counter == valid_urls_counter):
         stopTest()
@@ -303,7 +309,7 @@ def writeValidFile(filename):
     content = ""
 
     for url in valid_urls:
-        content += url + "," + `valid_urls[url]` + "\n"
+        content += url + "," + repr(valid_urls[url]) + "\n"
     saveFile(filename, content)
 
 
@@ -319,7 +325,12 @@ def parseFile(filename):
         Path to the file to open.
 
     """
-    global url_counter, original_urls , invalid_urls, fixed_url_counter, valid_urls_counter, invalid_urls_counter
+    global url_counter
+    global original_urls
+    global invalid_urls
+    global fixed_url_counter
+    global valid_urls_counter
+    global invalid_urls_counter
     original_urls = openFile(filename)
     schemes = ['http', 'https', 'file', 'chrome', 'about']
 
@@ -335,7 +346,8 @@ def parseFile(filename):
                 path = parsed_url.path
 
             # First test to see if the url is valid
-            if isURLValid(url) and isDomainNameValid(parsed_url.netloc) and isPathValid(path):
+            if (isURLValid(url) and isDomainNameValid(parsed_url.netloc)
+                    and isPathValid(path)):
                 # Add it to valid_urls, it doesn't matter to put something here
                 valid_urls[url] = 'OK'
                 # If the url is missing the HTTP protocol, add it as http
@@ -372,7 +384,11 @@ def start(args):
         Command line parameters
 
     """
-    global url_counter, fixed_url_counter, concurrent, verboseprint, invalid_urls_counter
+    global url_counter
+    global fixed_url_counter
+    global concurrent
+    global verboseprint
+    global invalid_urls_counter
 
     if args.verbose:
         def _verboseprint(*args):
@@ -390,7 +406,8 @@ def start(args):
         if args.test_urls:
             concurrent = int(args.concurrent_conn[0])
         else:
-            print "ERROR: concurrent --concurrent-connections (-c) parameter can only be used with --test-urls (-t) parameter"
+            print "ERROR: concurrent --concurrent-connections (-c) parameter \
+                   can only be used with --test-urls (-t) parameter"
             sys.exit(1)
 
     # Step 1: Load the file and split valid lines from malformed ones
@@ -435,7 +452,8 @@ def parsingFileStats(args):
     print "Non-malformed url's: " + repr(len(valid_urls))
     print "Fixed url's: " + repr(fixed_url_counter)
     print "Malformed url's: " + repr(invalid_urls_counter)
-    print "Duplicated url's: " + repr(url_counter - len(valid_urls) - len(invalid_urls))
+    print "Duplicated url's: " + repr(url_counter - len(valid_urls) -
+                                      len(invalid_urls))
 
 
 def testUrlsStats():
@@ -474,22 +492,27 @@ def run():
     parser.add_argument('-i', '--invalid',
                         dest='invalid_file',
                         nargs=1,
-                        help='Name of file to save the list of invalid url\'s.',
+                        help='Name of file to save the list of invalid \
+                        url\'s.',
                         required=True)
     parser.add_argument('-t', '--test-urls',
                         # dest='test_urls',
                         action='store_true',
-                        help='Try to connect to valid url\'s to discard the ones with errors (timeouts, dns failure, HTTP errors >= 400 , etc).',
+                        help='Try to connect to valid url\'s to discard the \
+                        ones with errors (timeouts, dns failure, HTTP \
+                        errors >= 400 , etc).',
                         required=False)
     parser.add_argument('-c', '--concurrent-connections',
                         dest='concurrent_conn',
                         nargs=1,
-                        help='Amount of concurrent connections to launch (default is ' + `concurrent` + ').',
+                        help='Amount of concurrent connections to launch \
+                        (default is ' + repr(concurrent) + ').',
                         required=False)
     parser.add_argument('--verbose', '-v',
                         action='count',
                         help='Verbose output.')
-    parser.add_argument('--version', action='version', version='urlvalidator ' + `__version__`)
+    parser.add_argument('--version', action='version', version='urlvalidator '
+                        + repr(__version__))
 
     parser.set_defaults(func=start)
     args = parser.parse_args()
