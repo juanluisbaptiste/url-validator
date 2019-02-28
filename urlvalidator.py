@@ -432,7 +432,7 @@ def testUrlsStats():
     for errors.
 
     """
-    print "\nFound " + `invalid_urls_counter` + " invalid url's"
+    print "\nFound " + `invalid_urls_counter` + " not responding url's"
     print "\nResults:\n"
     print "Valid url's: " + `len(valid_urls)`
     print "Total invalid url's: " + `len(invalid_urls)`
