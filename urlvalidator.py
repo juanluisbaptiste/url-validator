@@ -211,7 +211,7 @@ def testUrls():
                               body=None,
                               request_timeout=request_timeout,
                               connect_timeout=connect_timeout,
-                              validate_cert=False)
+                              validate_cert=False)  # TODO: validate certs ?
         http_client.fetch(request, handle_request)
     # start the tornado ioloop to listen for events
     tornado.ioloop.IOLoop.instance().start()
