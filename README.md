@@ -3,7 +3,7 @@
 Validate a list of url's and save the results into a CSV file.
 
 I developed this tool for work some time ago. At the time, we periodically
-received from a partner a file with a list of url's that we needed to be
+received from a partner a file with a list of url's that needed to be
 loaded in some software. The problem was that some of the url's in the file
 came with syntax errors, or were non-existent or non-accessible ones. So we needed to validate the contents of the file, try to fix the url's with syntax errors, and split the invalid ones from the good ones in two separate files.
 
