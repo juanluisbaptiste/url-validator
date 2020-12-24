@@ -1,11 +1,15 @@
 # URL Validator
 
-Validate a list of url's and save the results into a CSV file.
+Python program that takes a list of URL's to be checked for validity. Tries 
+to fix syntax errors and splits good ones from bad ones in separate CSV output 
+files.
 
 I developed this tool for work some time ago. At the time, we periodically
 received from a partner a file with a list of url's that needed to be
 loaded in some software. The problem was that some of the url's in the file
-came with syntax errors, or were non-existent or non-accessible ones. So we needed to validate the contents of the file, try to fix the url's with syntax errors, and split the invalid ones from the good ones in two separate files.
+came with syntax errors, or were non-existent or non-accessible ones. So we 
+needed to validate the contents of the file, try to fix the url's with syntax 
+errors, and split the invalid ones from the good ones in two separate files.
 
 Nowadays I use it to validate my [OneTab](https://www.one-tab.com/) url list
 from time to time.
